@@ -1,0 +1,69 @@
+Shader "Skybox/SingleAtmosphereScattering"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _AtmosphereHeight ("Atmosphere Height", Float) = 100000
+        _PlanetRadius ("Planet Radius", Float) = 6357000
+    }
+    SubShader
+    {
+        Tags { "Queue"="Background"
+        "RenderType"="Background"
+        "RenderPipeline"="UniversalPipeline"
+        "PreviewType" = "Skybox"
+        }
+        Cull Off ZWrite Off
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex VertexAtmosphereScattering
+            #pragma fragment FragmentAtmosphereScattering
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "ShaderLibrary/Scattering.hlsl"
+
+            struct Attribute {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct Varying {
+                float4 positionCS : SV_POSITION;
+                float3 positionOS : TEXCOORD0;
+                float3 positionWS : TEXCOORD1;
+                float2 uv : TEXCOORD2;
+            };
+
+            Varying VertexAtmosphereScattering(Attribute input) {
+                Varying output;
+                output.positionCS = TransformObjectToHClip(input.vertex.xyz);
+                output.positionOS = input.vertex.xyz;
+                output.positionWS = TransformObjectToWorld(input.vertex.xyz);
+                output.uv = input.uv;
+
+                return output;
+            }
+
+            float4 FragmentAtmosphereScattering(Varying input) : SV_TARGET {
+                float3 rayStart = _WorldSpaceCameraPos.xyz;
+
+                //未归一化的光线方向
+                float3 rayDir = -GetWorldSpaceViewDir(input.positionWS);
+                float3 planetCenter = float3(0, -_PlanetRadius, 0);
+                float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
+
+                float rayLength = min(length(rayDir), intersection.y);
+
+                float4 extinction;
+                float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
+                
+                return inScattering;
+            }
+
+            ENDHLSL
+        }
+    }
+}

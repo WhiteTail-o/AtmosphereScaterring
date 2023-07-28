@@ -23,6 +23,7 @@ CBUFFER_END
 
 float2 RaySphereInterection(float3 rayOrigin, float3 rayDir, float3 sphereCenter, float sphereRadius) {
     rayOrigin -= sphereCenter;
+    rayDir = normalize(rayDir);
     float a = dot(rayDir, rayDir);
     float b = 2.0 * dot(rayOrigin, rayDir);
     float c = dot(rayOrigin, rayOrigin) - sphereRadius * sphereRadius;
@@ -153,7 +154,7 @@ float4 IntegrateInscatteringRealtime(float3 rayStart, float3 rayDir, float rayLe
         prevLocalDensity = localDensity;
     }
 
-    ApplyPhaseFunction(scatterR, scatterM, dot(normalize(rayDir), normalize(-lightDir.xyz)));
+    ApplyPhaseFunction(scatterR, scatterM, dot(-normalize(rayDir), normalize(lightDir.xyz)));
     // float3 incomingLight = _IncomingLight.xyz;
     float3 incomingLight = _MainLightColor.rgb;
     float3 lightInScatter = (scatterR * _ScatteringR + scatterM * _ScatteringM) / (4.0 * PI) * incomingLight;

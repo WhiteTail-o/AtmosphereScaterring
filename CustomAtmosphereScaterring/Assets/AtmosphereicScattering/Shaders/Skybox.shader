@@ -51,7 +51,7 @@ Shader "Skybox/SingleAtmosphereScattering"
                 float3 rayStart = _WorldSpaceCameraPos.xyz;
 
                 //未归一化的光线方向
-                float3 rayDir = -GetWorldSpaceViewDir(input.positionWS);
+                float3 rayDir = input.positionWS - _WorldSpaceCameraPos;
                 float3 planetCenter = float3(0, -_PlanetRadius, 0);
                 float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
 

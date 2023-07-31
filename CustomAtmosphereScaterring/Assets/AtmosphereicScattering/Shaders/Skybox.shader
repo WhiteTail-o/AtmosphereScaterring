@@ -52,10 +52,13 @@ Shader "Skybox/SingleAtmosphereScattering"
 
                 //未归一化的光线方向
                 float3 rayDir = normalize(input.positionWS - _WorldSpaceCameraPos);
-                float3 planetCenter = float3(0, -_PlanetRadius, 0);
+                float3 planetCenter = float3(0, -_PlanetRadius - _OriginHeight, 0);
                 float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
 
                 float rayLength = intersection.y;
+
+                intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
+                rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
 
                 float4 extinction;
                 float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);

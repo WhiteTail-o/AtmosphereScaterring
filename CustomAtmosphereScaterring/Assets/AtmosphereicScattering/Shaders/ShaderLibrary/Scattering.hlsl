@@ -18,6 +18,7 @@ CBUFFER_START(UnityPerMaterial)
     float3 _ScatteringR; // Rayleigh's Scattering Coefficient while height is 0
     float3 _ScatteringM;
     float3 _IncomingLight; //incoming light
+    float _OriginHeight;
 CBUFFER_END
 
 
@@ -44,11 +45,10 @@ float2 RaySphereInterection(float3 rayOrigin, float3 rayDir, float3 sphereCenter
 
 //----- Output : 
 // opticalDepthCP:	dcp
-bool lightSampling(float3 position, float3 lightDir, out float2 opticalDepth) {
+bool lightSampling(float3 position, float3 lightDir, float3 planetCenter, out float2 opticalDepth) {
     opticalDepth = 0;
     float3 rayStart = position;
     float3 rayDir = -normalize(lightDir);
-    float3 planetCenter = float3(0, -_PlanetRadius, 0);
     float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
 
     float3 step = (intersection.y * rayDir) / RAY_STEP_COUNT;
@@ -70,7 +70,7 @@ bool GetAtmosphereDensityRealtime(float3 position, float3 planetCenter, float3 l
     float height = length(position - planetCenter) - _PlanetRadius;
     dpa = exp(-(height.xx) / _DensityScaleHeight.xy);
 
-    bool bOverGround = lightSampling(position, lightDir, dcp);
+    bool bOverGround = lightSampling(position, lightDir, planetCenter, dcp);
     return bOverGround;
 }
 

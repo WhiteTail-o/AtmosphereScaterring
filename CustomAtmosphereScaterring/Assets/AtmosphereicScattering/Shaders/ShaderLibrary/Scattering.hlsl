@@ -7,6 +7,9 @@
 TEXTURE2D(_MainTex); 
 SAMPLER(sampler_MainTex);
 
+TEXTURE2D(_CameraOpaqueTexture);
+SAMPLER(sampler_CameraOpaqueTexture);
+
 CBUFFER_START(UnityPerMaterial)
     float4 _MainTex_ST;
     float _AtmosphereHeight;

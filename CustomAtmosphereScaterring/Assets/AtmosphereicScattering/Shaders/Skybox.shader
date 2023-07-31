@@ -11,6 +11,7 @@ Shader "Skybox/SingleAtmosphereScattering"
         Tags { "Queue"="Background"
         "RenderType"="Background"
         "RenderPipeline"="UniversalPipeline"
+        "LightMode" = "CustomSkybox"
         "PreviewType" = "Skybox"
         }
         Cull Off ZWrite Off

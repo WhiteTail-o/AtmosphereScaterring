@@ -38,8 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.00009088324, g: 0.00016580544, b: 0.00021099926,
-    a: 1}
+  m_IndirectSpecularColor: {r: NaN, g: NaN, b: NaN, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -154,7 +153,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 2.65
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -211,14 +210,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 33371740}
-  m_LocalRotation: {x: -0.104250595, y: -0.80470735, z: 0.15865253, w: -0.56250095}
+  m_LocalRotation: {x: -0.10912294, y: -0.8033018, z: 0.16562249, w: -0.561576}
   m_LocalPosition: {x: 0, y: 3.02, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 158.123, y: -430.036, z: -180.661}
+  m_LocalEulerAnglesHint: {x: 22.871, y: -610.048, z: -360.666}
 --- !u!114 &33371743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,11 +317,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AtmosphereMat: {fileID: 2100000, guid: b5a29f8786e9cb14490ab28be0551dac, type: 2}
-  RayleighScatterCoef: 7.96
-  RayleighExtinctionCoef: 0.97
-  MieScatterCoef: 0.4
-  MieExtinctionCoef: 0.82
-  MieG: 0.969
+  RayleighScatterCoef: 7.85
+  RayleighExtinctionCoef: 1
+  MieScatterCoef: 0.62
+  MieExtinctionCoef: 0.67
+  MieG: 0.769
   DistanceScale: 1
 --- !u!4 &1247457116
 Transform:
@@ -392,7 +391,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 62.1
+  field of view: 68.4
   orthographic: 0
   orthographic size: 5
   m_Depth: -1

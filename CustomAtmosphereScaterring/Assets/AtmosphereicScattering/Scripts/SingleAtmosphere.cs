@@ -25,7 +25,7 @@ public class SingleAtmosphere : MonoBehaviour
     [Min(0f)]
     public float DistanceScale = 1f;
 
-    private const float AtmosphereHeight = 100000f;
+    private const float AtmosphereHeight = 1000000f;
     private const float PlanetRadius = 6357000f;
     private Vector4 DensityScale = new Vector4(7994f, 1200f, 0, 0);
     private Vector4 RayleighScatter = new Vector4(5.8f, 13.5f, 33.1f, 0f) * 0.000001f;

@@ -11,9 +11,11 @@ Shader "Skybox/SingleAtmosphereScattering"
         Tags { "Queue"="Background"
         "RenderType"="Background"
         "RenderPipeline"="UniversalPipeline"
+        "LightMode" = "CustomSkybox"
         "PreviewType" = "Skybox"
         }
         Cull Off ZWrite Off
+        ZTest Always
 
         Pass
         {
@@ -22,6 +24,7 @@ Shader "Skybox/SingleAtmosphereScattering"
             #pragma fragment FragmentAtmosphereScattering
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "ShaderLibrary/Scattering.hlsl"
 
@@ -31,7 +34,7 @@ Shader "Skybox/SingleAtmosphereScattering"
             };
 
             struct Varying {
-                float4 positionCS : SV_POSITION;
+                float4 positionHCS : SV_POSITION;
                 float3 positionOS : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
                 float2 uv : TEXCOORD2;
@@ -39,7 +42,7 @@ Shader "Skybox/SingleAtmosphereScattering"
 
             Varying VertexAtmosphereScattering(Attribute input) {
                 Varying output;
-                output.positionCS = TransformObjectToHClip(input.vertex.xyz);
+                output.positionHCS = TransformObjectToHClip(input.vertex.xyz);
                 output.positionOS = input.vertex.xyz;
                 output.positionWS = TransformObjectToWorld(input.vertex.xyz);
                 output.uv = input.uv;
@@ -48,18 +51,36 @@ Shader "Skybox/SingleAtmosphereScattering"
             }
 
             float4 FragmentAtmosphereScattering(Varying input) : SV_TARGET {
+                //Get Depth
+                float2 screenUV = input.positionHCS.xy / _ScaledScreenParams.xy;
+
+                // 从摄像机深度纹理中采样深度。
+                real depth = SampleSceneDepth(screenUV);
+                
+                float zBuffer = LinearEyeDepth(depth, _ZBufferParams);
+
                 float3 rayStart = _WorldSpaceCameraPos.xyz;
 
                 //未归一化的光线方向
-                float3 rayDir = input.positionWS - _WorldSpaceCameraPos;
-                float3 planetCenter = float3(0, -_PlanetRadius, 0);
+                float3 rayDir = normalize(input.positionWS - _WorldSpaceCameraPos);
+                float3 planetCenter = float3(0, -_PlanetRadius - _OriginHeight, 0);
                 float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
+                
+                float rayLength = intersection.y;
 
-                float rayLength = min(length(rayDir), intersection.y);
-
+                intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
+                rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
+                
+                if (zBuffer < _ProjectionParams.z-200) {
+                    rayLength = min(rayLength, zBuffer);
+                }
+                
+                
                 float4 extinction;
                 float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
-                
+                float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
+                inScattering = opaqueColor * extinction + inScattering;
+
                 return inScattering;
             }
 

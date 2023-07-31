@@ -25,7 +25,10 @@ public class SingleAtmosphere : MonoBehaviour
     [Min(0f)]
     public float DistanceScale = 1f;
 
-    private const float AtmosphereHeight = 100000f;
+    [Min(0f)]
+    public float OriginHeight = 100f;
+
+    private const float AtmosphereHeight = 1000000f;
     private const float PlanetRadius = 6357000f;
     private Vector4 DensityScale = new Vector4(7994f, 1200f, 0, 0);
     private Vector4 RayleighScatter = new Vector4(5.8f, 13.5f, 33.1f, 0f) * 0.000001f;
@@ -39,6 +42,7 @@ public class SingleAtmosphere : MonoBehaviour
     private static int MieGId = Shader.PropertyToID("_MieG");
     private static int ScatteringRId = Shader.PropertyToID("_ScatteringR");
     private static int ScatteringMId = Shader.PropertyToID("_ScatteringM");
+    private static int OriginHeightId = Shader.PropertyToID("_OriginHeight");
 
     // Start is called before the first frame update
     void Start()
@@ -59,6 +63,7 @@ public class SingleAtmosphere : MonoBehaviour
             AtmosphereMat.SetFloat(MieGId, MieG);
             AtmosphereMat.SetVector(ScatteringRId, RayleighScatterCoef * RayleighScatter);
             AtmosphereMat.SetVector(ScatteringMId, MieScatterCoef * MieScatter);
+            AtmosphereMat.SetFloat(OriginHeightId, OriginHeight);
         }
     }
 }

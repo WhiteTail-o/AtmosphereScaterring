@@ -195,6 +195,7 @@ void AtmosphereScaterring (uint3 id : SV_DispatchThreadID)
     float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
     // float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
     // inScattering = opaqueColor * extinction + inScattering;
+    inScattering.xyz = rayDir;
     inScattering.a = 1;
 
     _SkyboxTexture[id.xy] = inScattering;

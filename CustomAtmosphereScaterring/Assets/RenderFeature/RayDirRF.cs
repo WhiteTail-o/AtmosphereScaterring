@@ -2,12 +2,10 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class SkyboxBiltRF : ScriptableRendererFeature
+public class RayDirRF : ScriptableRendererFeature
 {
     class CustomRenderPass : ScriptableRenderPass
     {
-        static int rtId = Shader.PropertyToID("_OpaqueColor");
-
         // This method is called before executing the render pass.
         // It can be used to configure render targets and their clear state. Also to create temporary render target textures.
         // When empty this render pass will render to the active camera render target.
@@ -15,11 +13,6 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         // The render pipeline will ensure target setup and clearing happens in a performant manner.
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
-            RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor(Camera.main.pixelWidth, Camera.main.pixelHeight, RenderTextureFormat.DefaultHDR);
-            cmd.GetTemporaryRT(rtId, renderTextureDescriptor);
-
-            ConfigureTarget(rtId);
-            ConfigureClear(ClearFlag.Color, Color.black);
         }
 
         // Here you can implement the rendering logic.
@@ -28,18 +21,11 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            CommandBuffer cmd = CommandBufferPool.Get("CustomCopyColor");
-            cmd.Blit(renderingData.cameraData.renderer.cameraColorTarget, rtId);
-            context.ExecuteCommandBuffer(cmd);
-
-            cmd.Clear();
-            cmd.Release();
         }
 
         // Cleanup any allocated resources that were created during the execution of this render pass.
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
-           cmd.ReleaseTemporaryRT(rtId);
         }
     }
 
@@ -51,7 +37,7 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         m_ScriptablePass = new CustomRenderPass();
 
         // Configures where the render pass should be injected.
-        m_ScriptablePass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
+        m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
     }
 
     // Here you can inject one or multiple render passes in the renderer.

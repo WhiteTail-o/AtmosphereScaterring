@@ -80,7 +80,8 @@ Shader "Skybox/SingleAtmosphereScattering"
                 float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
                 float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
                 inScattering = opaqueColor * extinction + inScattering;
-
+                inScattering.a = 1;
+                
                 return inScattering;
             }
 

@@ -2,12 +2,11 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class SkyboxBiltRF : ScriptableRendererFeature
-{
+public class RayDirRF : ScriptableRendererFeature
+{  
     class CustomRenderPass : ScriptableRenderPass
     {
-        static int rtId = Shader.PropertyToID("_OpaqueColor");
-
+        public Material material;
         // This method is called before executing the render pass.
         // It can be used to configure render targets and their clear state. Also to create temporary render target textures.
         // When empty this render pass will render to the active camera render target.
@@ -16,9 +15,12 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor(Camera.main.pixelWidth, Camera.main.pixelHeight, RenderTextureFormat.DefaultHDR);
-            cmd.GetTemporaryRT(rtId, renderTextureDescriptor);
-
-            ConfigureTarget(rtId);
+            cmd.GetTemporaryRT(ShaderID.RayDirAndZTextureId, renderTextureDescriptor);
+            if (!material) {
+                material = new Material(Shader.Find("Skybox/RayDir"));
+            }
+            
+            ConfigureTarget(ShaderID.RayDirAndZTextureId);
             ConfigureClear(ClearFlag.Color, Color.black);
         }
 
@@ -28,8 +30,14 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            CommandBuffer cmd = CommandBufferPool.Get("CustomCopyColor");
-            cmd.Blit(renderingData.cameraData.renderer.cameraColorTarget, rtId);
+            if (material == null)
+            {
+                Debug.LogError("material is null");
+                return;
+            }
+
+            CommandBuffer cmd = CommandBufferPool.Get("RayDirAndZ");
+            cmd.Blit(null, ShaderID.RayDirAndZTextureId, material);
             context.ExecuteCommandBuffer(cmd);
 
             cmd.Clear();
@@ -39,7 +47,7 @@ public class SkyboxBiltRF : ScriptableRendererFeature
         // Cleanup any allocated resources that were created during the execution of this render pass.
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
-           cmd.ReleaseTemporaryRT(rtId);
+            cmd.ReleaseTemporaryRT(ShaderID.RayDirAndZTextureId);
         }
     }
 

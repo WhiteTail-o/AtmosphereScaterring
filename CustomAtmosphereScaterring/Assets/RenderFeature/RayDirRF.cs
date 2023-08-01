@@ -3,9 +3,10 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class RayDirRF : ScriptableRendererFeature
-{
+{  
     class CustomRenderPass : ScriptableRenderPass
     {
+        public Material material;
         // This method is called before executing the render pass.
         // It can be used to configure render targets and their clear state. Also to create temporary render target textures.
         // When empty this render pass will render to the active camera render target.
@@ -13,6 +14,14 @@ public class RayDirRF : ScriptableRendererFeature
         // The render pipeline will ensure target setup and clearing happens in a performant manner.
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
+            RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor(Camera.main.pixelWidth, Camera.main.pixelHeight, RenderTextureFormat.DefaultHDR);
+            cmd.GetTemporaryRT(ShaderID.RayDirAndZTextureId, renderTextureDescriptor);
+            if (!material) {
+                material = new Material(Shader.Find("Skybox/RayDir"));
+            }
+            
+            ConfigureTarget(ShaderID.RayDirAndZTextureId);
+            ConfigureClear(ClearFlag.Color, Color.black);
         }
 
         // Here you can implement the rendering logic.
@@ -21,11 +30,24 @@ public class RayDirRF : ScriptableRendererFeature
         // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            if (material == null)
+            {
+                Debug.LogError("material is null");
+                return;
+            }
+
+            CommandBuffer cmd = CommandBufferPool.Get("RayDirAndZ");
+            cmd.Blit(null, ShaderID.RayDirAndZTextureId, material);
+            context.ExecuteCommandBuffer(cmd);
+
+            cmd.Clear();
+            cmd.Release();
         }
 
         // Cleanup any allocated resources that were created during the execution of this render pass.
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
+            cmd.ReleaseTemporaryRT(ShaderID.RayDirAndZTextureId);
         }
     }
 
@@ -37,7 +59,7 @@ public class RayDirRF : ScriptableRendererFeature
         m_ScriptablePass = new CustomRenderPass();
 
         // Configures where the render pass should be injected.
-        m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+        m_ScriptablePass.renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
     }
 
     // Here you can inject one or multiple render passes in the renderer.

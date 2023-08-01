@@ -1,4 +1,4 @@
-Shader "Skybox/SingleAtmosphereScattering"
+Shader "Skybox/SingleAtmosphereScattering_ComputeShader"
 {
     Properties
     {
@@ -11,7 +11,6 @@ Shader "Skybox/SingleAtmosphereScattering"
         Tags { "Queue"="Background"
         "RenderType"="Background"
         "RenderPipeline"="UniversalPipeline"
-        "LightMode" = "CustomSkybox"
         "PreviewType" = "Skybox"
         }
         Cull Off ZWrite Off
@@ -22,6 +21,8 @@ Shader "Skybox/SingleAtmosphereScattering"
             HLSLPROGRAM
             #pragma vertex VertexAtmosphereScattering
             #pragma fragment FragmentAtmosphereScattering
+
+            #define USE_COMPUTE_SHADER
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
@@ -51,37 +52,39 @@ Shader "Skybox/SingleAtmosphereScattering"
             }
 
             float4 FragmentAtmosphereScattering(Varying input) : SV_TARGET {
-                //Get Depth
+                // //Get Depth
                 float2 screenUV = input.positionHCS.xy / _ScaledScreenParams.xy;
 
-                // 从摄像机深度纹理中采样深度。
-                real depth = SampleSceneDepth(screenUV);
-                
-                float zBuffer = LinearEyeDepth(depth, _ZBufferParams);
+                // float4 result = SAMPLE_TEXTURE2D(_RayDirAndZTexture, sampler_RayDirAndZTexture, screenUV);
 
-                float3 rayStart = _WorldSpaceCameraPos.xyz;
+                // // 从摄像机深度纹理中采样深度。
+                // real depth = result.w;
+                
+                // float zBuffer = LinearEyeDepth(depth, _ZBufferParams);
 
-                //未归一化的光线方向
-                float3 rayDir = normalize(input.positionWS - _WorldSpaceCameraPos);
-                float3 planetCenter = float3(0, -_PlanetRadius - _OriginHeight, 0);
-                float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
-                
-                float rayLength = intersection.y;
+                // float3 rayStart = _WorldSpaceCameraPos.xyz;
 
-                intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
-                rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
+                // //未归一化的光线方向
+                // float3 rayDir = normalize(result.xyz);
+                // float3 planetCenter = float3(0, -_PlanetRadius - _OriginHeight, 0);
+                // float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
                 
-                if (zBuffer < _ProjectionParams.z-200) {
-                    rayLength = min(rayLength, zBuffer);
-                }
-                
-                
-                float4 extinction;
-                float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
-                float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
-                inScattering = opaqueColor * extinction + inScattering;
-                inScattering.a = 1;
+                // float rayLength = intersection.y;
 
+                // intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
+                // rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
+                
+                // if (zBuffer < _ProjectionParams.z-200) {
+                //     rayLength = min(rayLength, zBuffer);
+                // }
+                
+                
+                // float4 extinction;
+                // float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
+                // float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
+                // inScattering = opaqueColor * extinction + inScattering;
+                // inScattering.a = 1;
+                float4 inScattering = SAMPLE_TEXTURE2D(_SkyboxTexture, sampler_SkyboxTexture, screenUV);
                 return inScattering;
             }
 

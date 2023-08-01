@@ -40,9 +40,11 @@ MonoBehaviour:
       type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
+  - {fileID: 1015740808599022863}
+  - {fileID: 8176078844408934526}
   - {fileID: 4005737722766204034}
   - {fileID: 6247921463039568914}
-  m_RendererFeatureMap: adc0de57c6d2eee5829cdc4c3c3d9737122c03bd7713b556
+  m_RendererFeatureMap: adc0de57c6d2eee50fad6940e2a2180e7eb094e863447771829cdc4c3c3d9737122c03bd7713b556
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -83,6 +85,19 @@ MonoBehaviour:
   m_ClusteredRendering: 0
   m_TileSize: 32
   m_IntermediateTextureMode: 1
+--- !u!114 &1015740808599022863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61040babf75f47d4ebce1527d116c0fd, type: 3}
+  m_Name: RayDirRF
+  m_EditorClassIdentifier: 
+  m_Active: 1
 --- !u!114 &4005737722766204034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,7 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: CustomSkybox
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: CustomSkybox
     Event: 450
@@ -135,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cdbc60f5704b94478e91b413a947d3b, type: 3}
   m_Name: SkyboxBiltRF
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
 --- !u!114 &6786036947355442020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,3 +164,25 @@ MonoBehaviour:
   m_Name: CustomRenderPassFeature
   m_EditorClassIdentifier: 
   m_Active: 1
+--- !u!114 &8176078844408934526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d45dedc72d292fb42bbb8229d86f97ac, type: 3}
+  m_Name: CustomSkyboxRF
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_ComputeShader: {fileID: 7200000, guid: f5668e648c8e39343a464f7c39227935, type: 3}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 6d16cb0aa4489484c8bb08ef4e6e0ae7, type: 2}
+  RayleighScatterCoef: 1
+  RayleighExtinctionCoef: 1
+  MieScatterCoef: 1
+  MieExtinctionCoef: 1
+  MieG: 0.76
+  DistanceScale: 1
+  OriginHeight: 100

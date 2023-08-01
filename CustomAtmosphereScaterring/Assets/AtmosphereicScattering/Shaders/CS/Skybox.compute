@@ -1,37 +1,27 @@
-#ifndef CUSTOM_SCATTERING_INCLUDED
-#define CUSTOM_SCATTERING_INCLUDED
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel AtmosphereScaterring
 
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+// #include "../ShaderLibrary/Scattering.hlsl"
 #define RAY_STEP_COUNT 50
-// #define PI            3.14159265359f
 
-TEXTURE2D(_MainTex); 
-SAMPLER(sampler_MainTex);
+Texture2D<float4> _RayDirAndZTexture;
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> _SkyboxTexture;
 
-TEXTURE2D(_CameraOpaqueTexture);
-SAMPLER(sampler_CameraOpaqueTexture);
-
-#ifdef USE_COMPUTE_SHADER
-TEXTURE2D(_RayDirAndZTexture);
-SAMPLER(sampler_RayDirAndZTexture);
-
-TEXTURE2D(_SkyboxTexture);
-SAMPLER(sampler_SkyboxTexture);
-#endif
-
-CBUFFER_START(UnityPerMaterial)
-    float4 _MainTex_ST;
-    float _AtmosphereHeight;
-    float _PlanetRadius;
-    float2 _DensityScaleHeight;
-    float3 _ExtinctionR;    //  Rayleigh Extinction Coefficient
-    float3 _ExtinctionM;    //  Mie Extinction Coefficient
-    float _MieG;    // g in Mie's phase function
-    float3 _ScatteringR; // Rayleigh's Scattering Coefficient while height is 0
-    float3 _ScatteringM;
-    float3 _IncomingLight; //incoming light
-    float _OriginHeight;
-CBUFFER_END
-
+float _AtmosphereHeight;
+float _PlanetRadius;
+float2 _DensityScaleHeight;
+float3 _ExtinctionR;    //  Rayleigh Extinction Coefficient
+float3 _ExtinctionM;    //  Mie Extinction Coefficient
+float _MieG;    // g in Mie's phase function
+float3 _ScatteringR; // Rayleigh's Scattering Coefficient while height is 0
+float3 _ScatteringM;
+float3 _IncomingLight; //incoming light
+float _OriginHeight;
 
 float2 RaySphereInterection(float3 rayOrigin, float3 rayDir, float3 sphereCenter, float sphereRadius) {
     rayOrigin -= sphereCenter;
@@ -176,5 +166,36 @@ float4 IntegrateInscatteringRealtime(float3 rayStart, float3 rayDir, float rayLe
 }
 
 
+[numthreads(8,8,1)]
+void AtmosphereScaterring (uint3 id : SV_DispatchThreadID)
+{
+    // 从摄像机深度纹理中采样深度。
+    float depth = _RayDirAndZTexture[id.xy].w;
+    
+    float zBuffer = LinearEyeDepth(depth, _ZBufferParams);
 
-#endif
+    float3 rayStart = _WorldSpaceCameraPos.xyz;
+
+    //未归一化的光线方向
+    float3 rayDir = normalize(_RayDirAndZTexture[id.xy].xyz);
+    float3 planetCenter = float3(0, -_PlanetRadius - _OriginHeight, 0);
+    float2 intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius + _AtmosphereHeight);
+    
+    float rayLength = intersection.y;
+
+    intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
+    rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
+    
+    // if (zBuffer < _ProjectionParams.z-200) {
+    //     rayLength = min(rayLength, zBuffer);
+    // }
+    
+    
+    float4 extinction;
+    float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
+    // float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
+    // inScattering = opaqueColor * extinction + inScattering;
+    inScattering.a = 1;
+
+    _SkyboxTexture[id.xy] = inScattering;
+}

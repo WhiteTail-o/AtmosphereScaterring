@@ -49,7 +49,8 @@ Shader "Skybox/RayDir"
                 real depth = SampleSceneDepth(screenUV);
 
                 float3 rayDir = normalize(input.positionWS - _WorldSpaceCameraPos);
-                return float4(rayDir, depth);
+                
+                return float4(screenUV, 0, depth);
             }
 
             ENDHLSL

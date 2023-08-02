@@ -11,12 +11,15 @@ public class LutBuilder : EditorWindow
     string sourcePath;
     public enum LutShader {
         PrecomputeAtmosphere,
+        PreIntergrateSkin,
         test
     }
 
     LutShader lutShader;
     Shader shader;
     string test;
+
+    int kernelId;
 
     [MenuItem("Image/LutBuilder")]
     static void SetReadWriteTrue()
@@ -43,9 +46,48 @@ public class LutBuilder : EditorWindow
     void Execute() {
         Material material = null;
         Texture2D inputTex2d = Resources.Load("Luts/Lut_init32") as Texture2D;
+        ComputeShader computeShader = Resources.Load("ComputeShaders/PreIntegratedSkin") as ComputeShader;
         switch (lutShader)
         {
             case LutShader.PrecomputeAtmosphere:
+
+                break;
+
+            case LutShader.PreIntergrateSkin:
+                
+                material = new Material(Shader.Find("Unlit/Copy"));
+
+                if (material && computeShader) {
+                    kernelId = computeShader.FindKernel("PreIntegratedSkin");
+                    
+                    RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor(256, 256, RenderTextureFormat.ARGB32, 0);
+                    renderTextureDescriptor.sRGB = false;
+
+                    RenderTexture rt = new RenderTexture(renderTextureDescriptor);
+                    rt.Create();
+
+                    RenderTexture tmpRt = RenderTexture.GetTemporary(renderTextureDescriptor);
+                    tmpRt.enableRandomWrite = true;
+
+                    computeShader.SetTexture(kernelId, "Result", tmpRt);
+                    material.mainTexture = tmpRt;
+                    computeShader.Dispatch(kernelId, 256/8, 256/8, 1);
+
+                    Graphics.Blit(tmpRt, rt, material);
+
+                    Texture2D outputTex2d = new Texture2D(rt.width, rt.height);
+                    
+                    outputTex2d.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0, false);
+                    byte[] dataBytes = outputTex2d.EncodeToPNG();
+                    string savePath = Application.dataPath + "/SampleCircle.png";
+                    FileStream fileStream = File.Open(savePath,FileMode.OpenOrCreate);
+                    fileStream.Write(dataBytes,0,dataBytes.Length);
+                    fileStream.Close();
+                    UnityEditor.AssetDatabase.SaveAssets();
+                    UnityEditor.AssetDatabase.Refresh();
+                    tmpRt.Release();
+                    Debug.Log("Finish");
+                }
 
                 break;
             
@@ -71,7 +113,7 @@ public class LutBuilder : EditorWindow
                     fileStream.Close();
                     UnityEditor.AssetDatabase.SaveAssets();
                     UnityEditor.AssetDatabase.Refresh();
-                    // Debug.Log(outputTex2d);
+                    rt.Release();
                     Debug.Log("Finish");
                 }
                 break;

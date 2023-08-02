@@ -72,6 +72,7 @@ public class CustomSkyboxRF : ScriptableRendererFeature
             // computeShader.Dispatch(kernelId, Camera.main.pixelWidth / 8, Camera.main.pixelHeight/8, 1);
 
             CommandBuffer cmd = CommandBufferPool.Get("CustomSkybox_CS");
+            
             cmd.SetGlobalTexture(ShaderID.SkyboxTextureId, ShaderID.SkyboxTextureId);
             cmd.SetComputeTextureParam(computeShader, kernelId, ShaderID.SkyboxTextureId, ShaderID.SkyboxTextureId);
             cmd.SetComputeFloatParam(computeShader, AtmosphereHeightId, SkyboxSettings.AtmosphereHeight);

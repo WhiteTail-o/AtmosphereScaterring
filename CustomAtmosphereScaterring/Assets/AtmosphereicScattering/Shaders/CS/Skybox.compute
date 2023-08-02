@@ -4,11 +4,16 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-// #include "../ShaderLibrary/Scattering.hlsl"
-#define RAY_STEP_COUNT 50
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+
+#pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+#pragma multi_compile _ _SHADOWS_SOFT
+
+#define RAY_STEP_COUNT 60
 
 Texture2D<float4> _RayDirAndZTexture;
 Texture2D<float4> _CameraOpaqueTexture;
+// Texture2D<float4> _MainLightShadowmapTexture;
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> _SkyboxTexture;
@@ -39,6 +44,10 @@ float2 RaySphereInterection(float3 rayOrigin, float3 rayDir, float3 sphereCenter
         d = sqrt(d);
         return float2(-b-d, -b+d) / (2.0 * a);
     }
+}
+
+bool outScreen(float2 uv) {
+    return uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1;
 }
 
 //----- Input
@@ -142,17 +151,20 @@ float4 IntegrateInscatteringRealtime(float3 rayStart, float3 rayDir, float rayLe
     for (int i = 1; i <= RAY_STEP_COUNT; i++) {
         float3 p = rayStart + step * i;
         GetAtmosphereDensityRealtime(p, planetCenter, lightDir, densityCP, localDensity);
+        float4 shadowPos = TransformWorldToShadowCoord(p);
+        float bInShadow =  MainLightRealtimeShadow(shadowPos);
+        if (bInShadow > 0.1 || outScreen(shadowPos.xy)) {
+            densityPA += (localDensity + prevLocalDensity) / 2.0 * stepSize;
+            float3 localInScatterR, localInScatterM;
+            ComputeLocalInScattering(localDensity, densityCP, densityPA, localInScatterR, localInScatterM);
 
-        densityPA += (localDensity + prevLocalDensity) / 2.0 * stepSize;
-        float3 localInScatterR, localInScatterM;
-        ComputeLocalInScattering(localDensity, densityCP, densityPA, localInScatterR, localInScatterM);
+            scatterR += (localInScatterR + prevLocalInScatterR) / 2.0 * stepSize;
+            scatterM += (localInScatterM + prevLocalInScatterM) / 2.0 * stepSize;
 
-        scatterR += (localInScatterR + prevLocalInScatterR) / 2.0 * stepSize;
-        scatterM += (localInScatterM + prevLocalInScatterM) / 2.0 * stepSize;
-
-        prevLocalInScatterR = localInScatterR;
-        prevLocalInScatterM = localInScatterM;
-
+            prevLocalInScatterR = localInScatterR;
+            prevLocalInScatterM = localInScatterM;
+        }
+        
         prevLocalDensity = localDensity;
     }
 
@@ -198,6 +210,8 @@ void AtmosphereScaterring (uint3 id : SV_DispatchThreadID)
     inScattering = opaqueColor * extinction + inScattering;
     // inScattering.xyz = rayDir;
     inScattering.a = 1;
+    float4 pos = TransformWorldToShadowCoord(rayStart + rayDir * rayLength);
+    float bInShadow =  MainLightRealtimeShadow(pos);
 
     _SkyboxTexture[id.xy] = inScattering;
 }

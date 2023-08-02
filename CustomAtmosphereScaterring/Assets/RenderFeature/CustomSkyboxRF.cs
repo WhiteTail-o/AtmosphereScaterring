@@ -25,8 +25,6 @@ public class CustomSkyboxRF : ScriptableRendererFeature
         private SkyboxSettings settings;
         int kernelId;
 
-        private RenderTexture rt;
-
         public CustomRenderPass(ComputeShader cs, Material mat, SkyboxSettings skyboxsettings) {
             computeShader = cs;
             settings = skyboxsettings;
@@ -58,19 +56,6 @@ public class CustomSkyboxRF : ScriptableRendererFeature
         // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            // material.SetTexture(ShaderID.SkyboxTextureId, rt);
-            // computeShader.SetTexture(kernelId, ShaderID.SkyboxTextureId, rt);
-            // computeShader.SetFloat(AtmosphereHeightId, SkyboxSettings.AtmosphereHeight);
-            // computeShader.SetFloat(PlanetRadiusId, SkyboxSettings.PlanetRadius);
-            // computeShader.SetVector(DensityScaleHeightId, settings.DensityScaleHeight);
-            // computeShader.SetVector(ExtinctionRId, settings.ExtinctionR);
-            // computeShader.SetVector(ExtinctionMId, settings.ExtinctionM);
-            // computeShader.SetFloat(MieGId, settings.MieG);
-            // computeShader.SetVector(ScatteringRId, settings.ScatteringR);
-            // computeShader.SetVector(ScatteringMId, settings.ScatteringM);
-            // computeShader.SetFloat(OriginHeightId, settings.OriginHeight);
-            // computeShader.Dispatch(kernelId, Camera.main.pixelWidth / 8, Camera.main.pixelHeight/8, 1);
-
             CommandBuffer cmd = CommandBufferPool.Get("CustomSkybox_CS");
             
             cmd.SetGlobalTexture(ShaderID.SkyboxTextureId, ShaderID.SkyboxTextureId);
@@ -123,12 +108,6 @@ public class CustomSkyboxRF : ScriptableRendererFeature
 
     [Min(0f)]
     public float OriginHeight = 100f;
-
-    // private const float AtmosphereHeight = 1000000f;
-    // private const float PlanetRadius = 6357000f;
-    // private Vector4 DensityScale = new Vector4(7994f, 1200f, 0, 0);
-    // private Vector4 RayleighScatter = new Vector4(5.8f, 13.5f, 33.1f, 0f) * 0.000001f;
-    // private Vector4 MieScatter = new Vector4(2f, 2f, 2f, 0f) * 0.00001f;
 
     private static int AtmosphereHeightId = Shader.PropertyToID("_AtmosphereHeight");
     private static int PlanetRadiusId = Shader.PropertyToID("_PlanetRadius");

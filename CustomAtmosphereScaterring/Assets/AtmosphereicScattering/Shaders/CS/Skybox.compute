@@ -8,6 +8,7 @@
 #define RAY_STEP_COUNT 50
 
 Texture2D<float4> _RayDirAndZTexture;
+Texture2D<float4> _CameraOpaqueTexture;
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> _SkyboxTexture;
@@ -186,16 +187,16 @@ void AtmosphereScaterring (uint3 id : SV_DispatchThreadID)
     intersection = RaySphereInterection(rayStart, rayDir, planetCenter, _PlanetRadius);
     rayLength = lerp(intersection.x, rayLength, step(intersection.x, 0));
     
-    // if (zBuffer < _ProjectionParams.z-200) {
-    //     rayLength = min(rayLength, zBuffer);
-    // }
+    if (zBuffer < _ProjectionParams.z-200) {
+        rayLength = min(rayLength, zBuffer);
+    }
     
     
     float4 extinction;
     float4 inScattering = IntegrateInscatteringRealtime(rayStart, normalize(rayDir), rayLength, planetCenter, 1, -normalize(_MainLightPosition.xyz), extinction);
-    // float4 opaqueColor = SAMPLE_TEXTURE2D(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, screenUV);
-    // inScattering = opaqueColor * extinction + inScattering;
-    inScattering.xyz = rayDir;
+    float4 opaqueColor = _CameraOpaqueTexture[id.xy];
+    inScattering = opaqueColor * extinction + inScattering;
+    // inScattering.xyz = rayDir;
     inScattering.a = 1;
 
     _SkyboxTexture[id.xy] = inScattering;

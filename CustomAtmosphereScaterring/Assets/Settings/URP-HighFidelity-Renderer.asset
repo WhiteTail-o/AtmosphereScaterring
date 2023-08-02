@@ -179,10 +179,10 @@ MonoBehaviour:
   m_Active: 1
   m_ComputeShader: {fileID: 7200000, guid: f5668e648c8e39343a464f7c39227935, type: 3}
   m_SkyboxMaterial: {fileID: 2100000, guid: 6d16cb0aa4489484c8bb08ef4e6e0ae7, type: 2}
-  RayleighScatterCoef: 1
+  RayleighScatterCoef: 7.94
   RayleighExtinctionCoef: 1
-  MieScatterCoef: 1
-  MieExtinctionCoef: 1
+  MieScatterCoef: 0.7
+  MieExtinctionCoef: 0.8
   MieG: 0.76
   DistanceScale: 1
-  OriginHeight: 100
+  OriginHeight: 1000

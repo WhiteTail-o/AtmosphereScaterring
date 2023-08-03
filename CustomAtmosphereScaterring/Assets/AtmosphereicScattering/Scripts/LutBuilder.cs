@@ -79,7 +79,7 @@ public class LutBuilder : EditorWindow
                     
                     outputTex2d.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0, false);
                     byte[] dataBytes = outputTex2d.EncodeToPNG();
-                    string savePath = Application.dataPath + "/SampleCircle.png";
+                    string savePath = Application.dataPath + "/Resources/Luts/SkinLut.png";
                     FileStream fileStream = File.Open(savePath,FileMode.OpenOrCreate);
                     fileStream.Write(dataBytes,0,dataBytes.Length);
                     fileStream.Close();

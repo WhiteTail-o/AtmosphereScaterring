@@ -103,8 +103,8 @@ public class CustomSkyboxRF : ScriptableRendererFeature
     [Range(0f, 0.999f)]
     public float MieG = 0.76f;
 
-    [Min(0f)]
-    public float DistanceScale = 1f;
+    // [Min(0f)]
+    // public float DistanceScale = 1f;
 
     [Min(0f)]
     public float OriginHeight = 100f;

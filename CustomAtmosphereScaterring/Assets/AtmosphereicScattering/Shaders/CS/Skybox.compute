@@ -9,7 +9,7 @@
 #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
 #pragma multi_compile _ _SHADOWS_SOFT
 
-#define RAY_STEP_COUNT 60
+#define RAY_STEP_COUNT 80
 
 Texture2D<float4> _RayDirAndZTexture;
 Texture2D<float4> _CameraOpaqueTexture;
@@ -153,7 +153,7 @@ float4 IntegrateInscatteringRealtime(float3 rayStart, float3 rayDir, float rayLe
         GetAtmosphereDensityRealtime(p, planetCenter, lightDir, densityCP, localDensity);
         float4 shadowPos = TransformWorldToShadowCoord(p);
         float bInShadow =  MainLightRealtimeShadow(shadowPos);
-        if (bInShadow > 0.1 || outScreen(shadowPos.xy)) {
+        if (bInShadow > 0.7 || (outScreen(shadowPos.xy))) {
             densityPA += (localDensity + prevLocalDensity) / 2.0 * stepSize;
             float3 localInScatterR, localInScatterM;
             ComputeLocalInScattering(localDensity, densityCP, densityPA, localInScatterR, localInScatterM);

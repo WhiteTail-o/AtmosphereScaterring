@@ -18,6 +18,7 @@ public class LutBuilder : EditorWindow
     LutShader lutShader;
     Shader shader;
     string test;
+    Color colorTint;
 
     int kernelId;
 
@@ -25,6 +26,10 @@ public class LutBuilder : EditorWindow
     static void SetReadWriteTrue()
     {
         LutBuilder lutBuilder = EditorWindow.GetWindow(typeof(LutBuilder)) as LutBuilder;
+    }
+
+    private void Start() {
+        colorTint = Color.white;
     }
 
     void OnGUI() {
@@ -37,6 +42,13 @@ public class LutBuilder : EditorWindow
         GUILayout.Label("Mode：");
         lutShader = (LutShader)EditorGUILayout.EnumPopup(lutShader);
         GUILayout.EndHorizontal();
+
+        // if (lutShader == LutShader.PreIntergrateSkin) {
+        //     GUILayout.BeginHorizontal();
+        //     GUILayout.Label("ScaterringColor Tint：");
+        //     colorTint = EditorGUILayout.ColorField(colorTint);
+        //     GUILayout.EndHorizontal();
+        // }
 
         if (GUILayout.Button("Start")) {
             Execute();
@@ -70,6 +82,7 @@ public class LutBuilder : EditorWindow
                     tmpRt.enableRandomWrite = true;
 
                     computeShader.SetTexture(kernelId, "Result", tmpRt);
+                    // computeShader.SetVector("_ScaterringTint", colorTint);
                     material.mainTexture = tmpRt;
                     computeShader.Dispatch(kernelId, 256/8, 256/8, 1);
 

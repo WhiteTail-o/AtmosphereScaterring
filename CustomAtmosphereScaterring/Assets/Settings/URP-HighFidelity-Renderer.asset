@@ -184,4 +184,5 @@ MonoBehaviour:
   MieScatterCoef: 0.7
   MieExtinctionCoef: 0.8
   MieG: 0.972
+  test: {fileID: 0}
   OriginHeight: 1000

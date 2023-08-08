@@ -105,7 +105,7 @@ public class CustomSkyboxRF : ScriptableRendererFeature
 
     // [Min(0f)]
     // public float DistanceScale = 1f;
-
+    
     [Min(0f)]
     public float OriginHeight = 100f;
 
@@ -119,7 +119,6 @@ public class CustomSkyboxRF : ScriptableRendererFeature
     private static int ScatteringMId = Shader.PropertyToID("_ScatteringM");
     private static int OriginHeightId = Shader.PropertyToID("_OriginHeight");
     // ==================================================================================================
-
 
     public override void Create()
     {

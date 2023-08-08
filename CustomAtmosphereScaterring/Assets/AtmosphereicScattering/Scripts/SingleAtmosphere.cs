@@ -28,6 +28,8 @@ public class SingleAtmosphere : MonoBehaviour
     [Min(0f)]
     public float OriginHeight = 100f;
 
+    public CustomSkyboxRF skyboxRF;
+
     private const float AtmosphereHeight = 1000000f;
     private const float PlanetRadius = 6357000f;
     private Vector4 DensityScale = new Vector4(7994f, 1200f, 0, 0);
@@ -44,6 +46,10 @@ public class SingleAtmosphere : MonoBehaviour
     private static int ScatteringMId = Shader.PropertyToID("_ScatteringM");
     private static int OriginHeightId = Shader.PropertyToID("_OriginHeight");
 
+    SingleAtmosphere() {
+        Debug.Log("SingleAtmosphere Constructor");
+    }
+    
     // Start is called before the first frame update
     void Start()
     {

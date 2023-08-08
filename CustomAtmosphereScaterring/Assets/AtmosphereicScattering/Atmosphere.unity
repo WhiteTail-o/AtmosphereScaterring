@@ -1573,6 +1573,7 @@ GameObject:
   - component: {fileID: 1352515102}
   - component: {fileID: 1352515101}
   - component: {fileID: 1352515100}
+  - component: {fileID: 1352515104}
   m_Layer: 0
   m_Name: OpaqueCube (1)
   m_TagString: Untagged
@@ -1658,6 +1659,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 43.747, y: 134.702, z: -47.769}
+--- !u!114 &1352515104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352515099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3df589c767fc6534a8c82ad508ba9420, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AtmosphereMat: {fileID: 0}
+  RayleighScatterCoef: 1
+  RayleighExtinctionCoef: 1
+  MieScatterCoef: 1
+  MieExtinctionCoef: 1
+  MieG: 0.76
+  DistanceScale: 1
+  OriginHeight: 100
 --- !u!1 &1385706208
 GameObject:
   m_ObjectHideFlags: 0
